@@ -179,6 +179,11 @@ function setupChart(ganttData) {
 
   // Add Export Functionality
   addExportListener();
+
+  // --- NEW: Add "Today" Line ---
+  // We use the provided date: November 13, 2025
+  const today = new Date('2025-11-13T12:00:00'); 
+  addTodayLine(gridEl, ganttData.timeColumns, today);
 }
 
 /**
@@ -220,7 +225,137 @@ function addExportListener() {
 }
 
 // -------------------------------------------------------------------
-// --- NEW: "ON-DEMAND" ANALYSIS MODAL ---
+// --- "TODAY" LINE HELPER FUNCTIONS ---
+// -------------------------------------------------------------------
+
+/**
+ * Calculates and adds the "Today" line to the grid.
+ * @param {HTMLElement} gridEl - The main .gantt-grid element.
+ * @param {string[]} timeColumns - The array of time columns (e.g., ["Q1 2025", ...]).
+ * @param {Date} today - The current date object.
+ */
+function addTodayLine(gridEl, timeColumns, today) {
+  const position = findTodayColumnPosition(today, timeColumns);
+  if (!position) return; // Today is not in the chart's range
+
+  try {
+    // Get element dimensions for calculation
+    const labelCol = gridEl.querySelector('.gantt-header-label');
+    const headerRow = gridEl.querySelector('.gantt-header');
+    
+    if (!labelCol || !headerRow) return;
+
+    const labelColWidth = labelCol.offsetWidth;
+    const headerHeight = headerRow.offsetHeight;
+    const gridWidth = gridEl.offsetWidth;
+
+    // Calculate pixel position
+    const timeColAreaWidth = gridWidth - labelColWidth;
+    const oneColWidth = timeColAreaWidth / timeColumns.length;
+    const todayOffset = (position.index + position.percentage) * oneColWidth;
+    const lineLeftPosition = labelColWidth + todayOffset;
+
+    // Create and append the line
+    const todayLine = document.createElement('div');
+    todayLine.className = 'gantt-today-line';
+    todayLine.style.top = `${headerHeight}px`;
+    todayLine.style.bottom = '0';
+    todayLine.style.left = `${lineLeftPosition}px`;
+    
+    gridEl.appendChild(todayLine);
+
+  } catch (e) {
+    console.error("Error calculating 'Today' line position:", e);
+  }
+}
+
+/**
+ * Finds the column index and percentage offset for today's date.
+ * @param {Date} today - The current date.
+ * @param {string[]} timeColumns - The array of time columns.
+ * @returns {{index: number, percentage: number} | null}
+ */
+function findTodayColumnPosition(today, timeColumns) {
+  if (timeColumns.length === 0) return null;
+
+  const firstCol = timeColumns[0];
+  const todayYear = today.getFullYear();
+
+  // 1. Check for Year columns (e.g., "2025")
+  if (/^\d{4}$/.test(firstCol)) {
+    const todayYearStr = todayYear.toString();
+    const index = timeColumns.indexOf(todayYearStr);
+    if (index === -1) return null;
+
+    const startOfYear = new Date(todayYear, 0, 1);
+    const endOfYear = new Date(todayYear, 11, 31);
+    const dayOfYear = (today - startOfYear) / (1000 * 60 * 60 * 24);
+    const totalDays = (endOfYear - startOfYear) / (1000 * 60 * 60 * 24);
+    const percentage = dayOfYear / totalDays;
+    return { index, percentage };
+  }
+
+  // 2. Check for Quarter columns (e.g., "Q4 2025")
+  if (/^Q[1-4]\s\d{4}$/.test(firstCol)) {
+    const month = today.getMonth();
+    const quarter = Math.floor(month / 3) + 1;
+    const todayQuarterStr = `Q${quarter} ${todayYear}`;
+    const index = timeColumns.indexOf(todayQuarterStr);
+    if (index === -1) return null;
+
+    const quarterStartMonth = (quarter - 1) * 3;
+    const startOfQuarter = new Date(todayYear, quarterStartMonth, 1);
+    const endOfQuarter = new Date(todayYear, quarterStartMonth + 3, 0); // 0th day of next month
+    const dayInQuarter = (today - startOfQuarter) / (1000 * 60 * 60 * 24);
+    const totalDays = (endOfQuarter - startOfQuarter) / (1000 * 60 * 60 * 24);
+    const percentage = dayInQuarter / totalDays;
+    return { index, percentage };
+  }
+
+  // 3. Check for Month columns (e.g., "Nov 2025")
+  if (/^[A-Za-z]{3}\s\d{4}$/.test(firstCol)) {
+    const todayMonthStr = today.toLocaleString('en-US', { month: 'short' }) + ` ${todayYear}`;
+    const index = timeColumns.indexOf(todayMonthStr);
+    if (index === -1) return null;
+
+    const startOfMonth = new Date(todayYear, today.getMonth(), 1);
+    const endOfMonth = new Date(todayYear, today.getMonth() + 1, 0);
+    const dayInMonth = today.getDate(); // 13th
+    const totalDays = endOfMonth.getDate(); // 30 for Nov
+    const percentage = dayInMonth / totalDays;
+    return { index, percentage };
+  }
+  
+  // 4. Check for Week columns (e.g., "W46 2025")
+  if (/^W\d{1,2}\s\d{4}$/.test(firstCol)) {
+    const todayWeekStr = `W${getWeek(today)} ${todayYear}`;
+    const index = timeColumns.indexOf(todayWeekStr);
+    if (index === -1) return null;
+
+    const dayOfWeek = today.getDay(); // 0 (Sun) - 6 (Sat)
+    const percentage = (dayOfWeek + 0.5) / 7; // Place line in middle of the day
+    return { index, percentage };
+  }
+
+  return null; // Unknown format
+}
+
+/**
+ * Gets the ISO 8601 week number for a given date.
+ * @param {Date} date - The date.
+ * @returns {number} The week number.
+ */
+function getWeek(date) {
+  var d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  var dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+  return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+}
+
+
+// -------------------------------------------------------------------
+// --- "ON-DEMAND" ANALYSIS MODAL ---
 // -------------------------------------------------------------------
 
 /**

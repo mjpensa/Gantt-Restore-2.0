@@ -140,6 +140,7 @@ body {
 .gantt-grid {
   display: grid;
   width: 100%;
+  position: relative; /* <-- ADDED FOR TODAY LINE */
 }
 
 /* 9. Grid Header (Weeks) */
@@ -214,7 +215,7 @@ body {
   margin: 6px 4px; /* Vertical centering, small horizontal gap */
   border-radius: 4px;
   color: white;
-  z-index: 2;
+  z-index: 2; /* <-- Set to 2 */
   overflow: hidden;
   grid-row: 1; /* Always on the first (and only) row of its container */
 }
@@ -515,4 +516,16 @@ body {
 }
 .chat-send-btn:hover {
   background-color: #0056b3;
+}
+
+/* ------------------------------------------------------------------- */
+/* --- NEW: "TODAY" VERTICAL LINE --- */
+/* ------------------------------------------------------------------- */
+
+.gantt-today-line {
+  position: absolute;
+  width: 1px; /* Thin red line */
+  background-color: #FF4560; /* Red (same as 'orange' bar) */
+  z-index: 3; /* Above bars (bars are z-index 2) */
+  /* 'top', 'bottom', and 'left' are set by JavaScript */
 }
