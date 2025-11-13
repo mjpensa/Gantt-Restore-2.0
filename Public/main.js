@@ -272,7 +272,7 @@ async function showAnalysisModal(taskIdentifier) {
 
     if (!response.ok) {
       const err = await response.json();
-      throw new Error(err.error || "Server error");
+      throw new Error(err.error || "Server error"); // This is line 275
     }
 
     const analysis = await response.json();
@@ -289,7 +289,7 @@ async function showAnalysisModal(taskIdentifier) {
     `;
 
   } catch (error) {
-    console.error("Error fetching analysis:", error);
+    console.error("Error fetching analysis:", error); // This is line 292
     document.getElementById('modal-body-content').innerHTML = `<div class="modal-error">Failed to load analysis: ${error.message}</div>`;
   }
 }
@@ -310,16 +310,22 @@ function buildAnalysisList(title, items, itemKey, sourceKey) {
   if (!items || items.length === 0) return '';
   
   const listItems = items.map(item => {
-    // MODIFICATION: Check for a clickable URL
-    const sourceText = item[sourceKey];
-    const sourceUrl = item.url; // Get the new URL field
+    // MODIFICATION: Client-side URL parsing
+    const sourceText = item[sourceKey]; // e.g., "[https://example.com]" or "FileA.docx"
     let sourceElement = '';
 
-    if (sourceUrl && sourceUrl.startsWith('http')) {
-      // If we have a valid URL, render a link
-      sourceElement = `(Source: <a href="${sourceUrl}" target="_blank" rel="noopener noreferrer">${sourceText}</a>)`;
+    // Regex to find a URL (http or https) inside the source text
+    // Looks for http(s):// followed by non-space, non-'],' non-')' chars
+    const urlRegex = /(https?:\/\/[^\s\]\)]+)/;
+    const match = sourceText.match(urlRegex);
+    
+    if (match && match[0]) {
+      // A URL was found!
+      const url = match[0];
+      // We render the *original* sourceText as the link text
+      sourceElement = `(Source: <a href="${url}" target="_blank" rel="noopener noreferrer">${sourceText}</a>)`;
     } else {
-      // Otherwise, render plain text
+      // No URL found, just render plain text
       sourceElement = `(Source: ${sourceText})`;
     }
 
