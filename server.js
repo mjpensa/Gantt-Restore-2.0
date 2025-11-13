@@ -211,9 +211,12 @@ app.post('/get-task-analysis', async (req, res) => {
   2.  **CITE SOURCES (HIERARCHY):** You MUST find a source for every 'fact' and 'assumption'. Follow this logic:
       a.  **PRIORITY 1 (Inline Citation):** First, search the research text *immediately near* the fact/assumption for a specific inline citation (e.g., text inside brackets \`[example.com]\`, \`[Source: Report X]\`, or parentheses \`(example.com)\`). If found, you MUST use this inline text as the 'source' value.
       b.  **PRIORITY 2 (Filename Fallback):** If and *only if* no specific inline citation is found for that fact/assumption, you MUST default to using the filename (e.g., "FileA.docx") as the 'source', which you can find in the \`--- Start of file: ... ---\` wrapper.
-  3.  **DETERMINE STATUS:** Determine the task's 'status' ("completed", "in-progress", or "not-started") based on the current date (assume "November 2025") and the task's dates.
-  4.  **PROVIDE RATIONALE:** You MUST provide a 'rationale' for 'in-progress' and 'not-started' tasks, analyzing the likelihood of on-time completion based on the 'facts' and 'assumptions'.
-  5.  **CLEAN STRINGS:** All string values MUST be valid JSON strings. You MUST properly escape any characters that would break JSON, such as double quotes (\") and newlines (\\n).`;
+  3.  **POPULATE URL:** After you determine the 'source' (from step 2a or 2b):
+      a.  If the source text is a valid, full URL (starts with \`http://\` or \`https://\`), you MUST copy this full URL into the \`url\` field.
+      b.  If the source text is *not* a full URL (e.g., "FileA.docx" or "[Report X]"), you MUST set the \`url\` field to \`null\`.
+  4.  **DETERMINE STATUS:** Determine the task's 'status' ("completed", "in-progress", or "not-started") based on the current date (assume "November 2025") and the task's dates.
+  5.  **PROVIDE RATIONALE:** You MUST provide a 'rationale' for 'in-progress' and 'not-started' tasks, analyzing the likelihood of on-time completion based on the 'facts' and 'assumptions'.
+  6.  **CLEAN STRINGS:** All string values MUST be valid JSON strings. You MUST properly escape any characters that would break JSON, such as double quotes (\") and newlines (\\n).`;
   
   const geminiUserQuery = `Research Content:\n${researchTextCache}\n\n**YOUR TASK:** Provide a full, detailed analysis for this specific task:
   - Entity: "${entity}"
@@ -231,14 +234,22 @@ app.post('/get-task-analysis', async (req, res) => {
         type: "ARRAY",
         items: {
           type: "OBJECT",
-          properties: { fact: { type: "STRING" }, source: { type: "STRING" } }
+          properties: { 
+            fact: { type: "STRING" }, 
+            source: { type: "STRING" },
+            url: { type: "STRING", nullable: true } // MODIFICATION: Added optional url field
+          }
         }
       },
       assumptions: {
         type: "ARRAY",
         items: {
           type: "OBJECT",
-          properties: { assumption: { type: "STRING" }, source: { type: "STRING" } }
+          properties: { 
+            assumption: { type: "STRING" }, 
+            source: { type: "STRING" },
+            url: { type: "STRING", nullable: true } // MODIFICATION: Added optional url field
+          }
         }
       },
       rationale: { type: "STRING" }, // For 'in-progress' or 'not-started'

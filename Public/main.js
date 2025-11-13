@@ -309,12 +309,25 @@ function buildAnalysisSection(title, content) {
 function buildAnalysisList(title, items, itemKey, sourceKey) {
   if (!items || items.length === 0) return '';
   
-  const listItems = items.map(item => 
-    `<li>
+  const listItems = items.map(item => {
+    // MODIFICATION: Check for a clickable URL
+    const sourceText = item[sourceKey];
+    const sourceUrl = item.url; // Get the new URL field
+    let sourceElement = '';
+
+    if (sourceUrl && sourceUrl.startsWith('http')) {
+      // If we have a valid URL, render a link
+      sourceElement = `(Source: <a href="${sourceUrl}" target="_blank" rel="noopener noreferrer">${sourceText}</a>)`;
+    } else {
+      // Otherwise, render plain text
+      sourceElement = `(Source: ${sourceText})`;
+    }
+
+    return `<li>
       <p>${item[itemKey]}</p>
-      <span class="source">(Source: ${item[sourceKey]})</span>
-    </li>`
-  ).join('');
+      <span class="source">${sourceElement}</span>
+    </li>`;
+  }).join('');
   
   return `
     <div class="analysis-section">

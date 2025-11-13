@@ -409,3 +409,14 @@ body {
   color: #6b7280;
   font-style: italic;
 }
+
+/* --- NEW: STYLING FOR CLICKABLE LINKS IN CITATIONS --- */
+.analysis-list li .source a {
+  color: #007bff; /* Standard link blue */
+  text-decoration: underline;
+  cursor: pointer;
+  font-style: italic; /* Maintain italic style */
+}
+.analysis-list li .source a:hover {
+  color: #0056b3; /* Darker blue on hover */
+}
