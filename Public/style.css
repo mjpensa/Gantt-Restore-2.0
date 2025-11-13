@@ -162,7 +162,9 @@ body {
   padding: 10px 12px;
   font-size: 13px;
   border-bottom: 1px solid #f0f0f0;
-  white-space: nowrap;
+  /* --- MODIFICATION: Allow text wrapping --- */
+  white-space: normal; /* Was 'nowrap' */
+  overflow-wrap: break-word; /* Break long words if needed */
 }
 
 .gantt-row-label.swimlane {
