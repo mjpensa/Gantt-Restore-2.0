@@ -310,22 +310,28 @@ function buildAnalysisList(title, items, itemKey, sourceKey) {
   if (!items || items.length === 0) return '';
   
   const listItems = items.map(item => {
-    // MODIFICATION: Client-side URL parsing
-    const sourceText = item[sourceKey]; // e.g., "[https://example.com]" or "FileA.docx"
+    // --- MODIFICATION: Client-side URL parsing ---
+    const sourceText = item[sourceKey]; // e.g., "[https://example.com]" or "[example.com]" or "FileA.docx"
     let sourceElement = '';
 
-    // Regex to find a URL (http or https) inside the source text
-    // Looks for http(s):// followed by non-space, non-'],' non-')' chars
-    const urlRegex = /(https?:\/\/[^\s\]\)]+)/;
+    // Regex to find a URL-like string (http, www, or domain.com)
+    const urlRegex = /(https?:\/\/[^\s\]\)]+)|(www\.[^\s\]\)]+)|([a-zA-Z0-9\-\.]+\.(com|org|net|gov|edu|io|co)[^\s\]\)]*)/;
     const match = sourceText.match(urlRegex);
     
-    if (match && match[0]) {
-      // A URL was found!
-      const url = match[0];
+    if (match) {
+      // A URL-like part was found
+      let url = match[1] || match[2] || match[3]; // Get the part that matched
+      let href = url;
+
+      // If it doesn't start with http, add it
+      if (!href.startsWith('http://') && !href.startsWith('https://')) {
+        href = `https://${href}`;
+      }
+      
       // We render the *original* sourceText as the link text
-      sourceElement = `(Source: <a href="${url}" target="_blank" rel="noopener noreferrer">${sourceText}</a>)`;
+      sourceElement = `(Source: <a href="${href}" target="_blank" rel="noopener noreferrer">${sourceText}</a>)`;
     } else {
-      // No URL found, just render plain text
+      // No URL found (e.g., "FileA.docx" or "[Source: Report X]"), just render plain text
       sourceElement = `(Source: ${sourceText})`;
     }
 
