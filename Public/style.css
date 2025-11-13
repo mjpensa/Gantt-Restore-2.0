@@ -420,3 +420,99 @@ body {
 .analysis-list li .source a:hover {
   color: #0056b3; /* Darker blue on hover */
 }
+
+
+/* ------------------------------------------------------------------- */
+/* --- NEW: CHAT INTERFACE STYLES --- */
+/* ------------------------------------------------------------------- */
+
+.chat-container {
+  margin-top: 24px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 20px;
+}
+
+.chat-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.chat-history {
+  height: 150px;
+  max-height: 150px;
+  overflow-y: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 12px;
+  background-color: #f9fafb;
+  margin-bottom: 12px;
+}
+
+.chat-message {
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  max-width: 85%;
+}
+.chat-message:last-child {
+  margin-bottom: 0;
+}
+
+.chat-message-user {
+  background-color: #dbeafe; /* Light blue */
+  color: #1e40af;
+  margin-left: auto;
+  text-align: right;
+}
+
+.chat-message-llm {
+  background-color: #e5e7eb; /* Light grey */
+  color: #374151;
+  margin-right: auto;
+  text-align: left;
+}
+
+.chat-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #a0aec0;
+  border-top-color: #374151;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: inline-block; /* Aligns with text if it was present */
+}
+
+.chat-form {
+  display: flex;
+  gap: 8px;
+}
+
+.chat-input {
+  flex-grow: 1;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+.chat-send-btn {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.chat-send-btn:hover {
+  background-color: #0056b3;
+}

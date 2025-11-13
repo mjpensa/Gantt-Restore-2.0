@@ -25,8 +25,8 @@ const upload = multer({ storage: multer.memoryStorage() }); // Store files in me
 let researchTextCache = "";
 let researchFilesCache = []; // To store file names for context
 
-// --- Helper Function for API Calls ---
-async function callGemini(payload, retryCount = 3) {
+// --- Helper Function for API Calls (JSON Response) ---
+async function callGeminiForJson(payload, retryCount = 3) {
   for (let attempt = 0; attempt < retryCount; attempt++) {
     try {
       const response = await fetch(API_URL, {
@@ -56,7 +56,6 @@ async function callGemini(payload, retryCount = 3) {
       }
       
       const extractedJsonText = result.candidates[0].content.parts[0].text;
-      // This is line 59, where the error was happening
       return JSON.parse(extractedJsonText); // Return the parsed JSON
 
     } catch (error) {
@@ -70,8 +69,51 @@ async function callGemini(payload, retryCount = 3) {
   throw new Error('All API retry attempts failed.');
 }
 
+// --- NEW Helper Function for API Calls (Text Response) ---
+async function callGeminiForText(payload, retryCount = 3) {
+  for (let attempt = 0; attempt < retryCount; attempt++) {
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API call failed with status: ${response.status} - ${errorText}`);
+      }
+
+      const result = await response.json();
+
+      if (!result.candidates || !result.candidates[0] || !result.candidates[0].content) {
+        console.error('Invalid API response:', JSON.stringify(result));
+        throw new Error('Invalid response from AI API');
+      }
+
+      const safetyRatings = result.candidates[0].safetyRatings;
+      if (safetyRatings) {
+        const blockedRating = safetyRatings.find(rating => rating.blocked);
+        if (blockedRating) {
+          throw new Error(`API call blocked due to safety rating: ${blockedRating.category}`);
+        }
+      }
+      
+      return result.candidates[0].content.parts[0].text; // Return raw text
+
+    } catch (error) {
+      console.log(`Attempt ${attempt + 1} failed:`, error.message);
+      if (attempt >= retryCount - 1) {
+        throw error; // Throw the last error
+      }
+      await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+    }
+  }
+  throw new Error('All API retry attempts failed.');
+}
+
+
 // --- Main Endpoint: /generate-chart ---
-// This endpoint now does ONE AI call to get the *visual chart data only*.
 app.post('/generate-chart', upload.array('researchFiles'), async (req, res) => {
   const userPrompt = req.body.prompt;
   researchTextCache = ""; // Clear cache for new request
@@ -103,7 +145,6 @@ app.post('/generate-chart', upload.array('researchFiles'), async (req, res) => {
   }
 
   // 2. Define the *single, powerful* system prompt
-  // --- NEW, MORE PRECISE SANITIZATION RULE ---
   const geminiSystemPrompt = `You are an expert project management analyst. Your job is to analyze a user's prompt and research files to build a complete Gantt chart data object.
   
   You MUST respond with *only* a valid JSON object matching the schema.
@@ -181,8 +222,7 @@ app.post('/generate-chart', upload.array('researchFiles'), async (req, res) => {
 
   // 5. Call the API
   try {
-    // This is line 180 (where the callGemini function is invoked)
-    const ganttData = await callGemini(payload);
+    const ganttData = await callGeminiForJson(payload);
     
     // 6. Send the Gantt data to the frontend
     res.json(ganttData); // Send the object directly
@@ -195,7 +235,7 @@ app.post('/generate-chart', upload.array('researchFiles'), async (req, res) => {
 
 
 // -------------------------------------------------------------------
-// --- "ON-DEMAND" ANALYSIS ENDPOINT (Unchanged) ---
+// --- "ON-DEMAND" ANALYSIS ENDPOINT ---
 // -------------------------------------------------------------------
 app.post('/get-task-analysis', async (req, res) => {
   const { taskName, entity } = req.body;
@@ -205,7 +245,6 @@ app.post('/get-task-analysis', async (req, res) => {
   }
 
   // 1. Define the "Analyst" prompt
-  // --- MODIFICATION: Updated rules for HTML/Markdown parsing ---
   const geminiSystemPrompt = `You are a senior project management analyst. Your job is to analyze the provided research and a user prompt to build a detailed analysis for *one single task*.
   
   The 'Research Content' may contain raw HTML (from .docx files) and Markdown (from .md files). You MUST parse these.
@@ -233,7 +272,6 @@ app.post('/get-task-analysis', async (req, res) => {
   - Task Name: "${taskName}"`;
 
   // 2. Define the *single-task* schema
-  // --- MODIFICATION: Re-added the 'url' field ---
   const analysisSchema = {
     type: "OBJECT",
     properties: {
@@ -285,13 +323,59 @@ app.post('/get-task-analysis', async (req, res) => {
 
   // 4. Call the API
   try {
-    const analysisData = await callGemini(payload);
+    const analysisData = await callGeminiForJson(payload);
     res.json(analysisData); // Send the single-task analysis back
   } catch (e) {
     console.error("Task Analysis API error:", e);
     res.status(500).json({ error: `Error generating task analysis: ${e.message}` });
   }
 });
+
+
+// -------------------------------------------------------------------
+// --- NEW "ASK A QUESTION" ENDPOINT ---
+// -------------------------------------------------------------------
+app.post('/ask-question', async (req, res) => {
+  const { taskName, entity, question } = req.body;
+
+  if (!taskName || !entity || !question) {
+    return res.status(400).json({ error: "Missing taskName, entity, or question" });
+  }
+
+  // 1. Define the "Grounded Q&A" prompt
+  const geminiSystemPrompt = `You are a project analyst. Your job is to answer a user's question about a specific task.
+  
+  **CRITICAL RULES:**
+  1.  **GROUNDING:** You MUST answer the question *only* using the information in the provided 'Research Content'.
+  2.  **CONTEXT:** Your answer MUST be in the context of the task: "${taskName}" (for entity: "${entity}").
+  3.  **NO SPECULATION:** If the answer cannot be found in the 'Research Content', you MUST respond with "I'm sorry, I don't have enough information in the provided files to answer that question."
+  4.  **CONCISE:** Keep your answer concise and to the point.
+  5.  **NO PREAMBLE:** Do not start your response with "Based on the research..." just answer the question directly.`;
+  
+  const geminiUserQuery = `Research Content:\n${researchTextCache}\n\n**User Question:** ${question}`;
+
+  // 2. Define the payload (no schema, simple text generation)
+  const payload = {
+    contents: [{ parts: [{ text: geminiUserQuery }] }],
+    systemInstruction: { parts: [{ text: geminiSystemPrompt }] },
+    generationConfig: {
+      maxOutputTokens: 1024,
+      temperature: 0.1, // Slight creativity for natural language
+      topP: 1,
+      topK: 1
+    }
+  };
+
+  // 3. Call the *text* helper
+  try {
+    const textResponse = await callGeminiForText(payload);
+    res.json({ answer: textResponse }); // Send the text answer back
+  } catch (e) {
+    console.error("Q&A API error:", e);
+    res.status(500).json({ error: `Error generating answer: ${e.message}` });
+  }
+});
+
 
 // --- Server Start ---
 app.listen(port, () => {

@@ -276,10 +276,11 @@ async function showAnalysisModal(taskIdentifier) {
     }
 
     const analysis = await response.json();
+    const modalBody = document.getElementById('modal-body-content');
 
     // 5. Populate the modal with the analysis
     document.querySelector('.modal-title').textContent = analysis.taskName;
-    document.getElementById('modal-body-content').innerHTML = `
+    modalBody.innerHTML = `
       ${buildAnalysisSection('Status', `<span class="status-pill status-${analysis.status.replace(/\s+/g, '-').toLowerCase()}">${analysis.status}</span>`)}
       ${buildAnalysisSection('Dates', `${analysis.startDate || 'N/A'} to ${analysis.endDate || 'N/A'}`)}
       ${buildAnalysisList('Facts', analysis.facts, 'fact', 'source')}
@@ -288,11 +289,90 @@ async function showAnalysisModal(taskIdentifier) {
       ${buildAnalysisSection('Rationale / Hurdles', analysis.rationale)}
     `;
 
+    // 6. --- NEW: Add the chat interface ---
+    const chatContainer = document.createElement('div');
+    chatContainer.className = 'chat-container';
+    chatContainer.innerHTML = `
+      <h4 class="chat-title">Ask a follow-up</h4>
+      <div class="chat-history" id="chat-history"></div>
+      <form class="chat-form" id="chat-form">
+        <input type="text" id="chat-input" class="chat-input" placeholder="Ask about this task..." autocomplete="off">
+        <button type="submit" class="chat-send-btn">Send</button>
+      </form>
+    `;
+    modalBody.appendChild(chatContainer);
+
+    // 7. --- NEW: Add chat form listener ---
+    const chatForm = document.getElementById('chat-form');
+    chatForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      handleAskQuestion(taskIdentifier);
+    });
+
   } catch (error) {
     console.error("Error fetching analysis:", error); // This is line 292
     document.getElementById('modal-body-content').innerHTML = `<div class="modal-error">Failed to load analysis: ${error.message}</div>`;
   }
 }
+
+/**
+ * --- NEW: Handles the chat form submission ---
+ */
+async function handleAskQuestion(taskIdentifier) {
+  const chatInput = document.getElementById('chat-input');
+  const chatHistory = document.getElementById('chat-history');
+  const question = chatInput.value.trim();
+
+  if (!question) return;
+
+  // 1. Display user's question
+  const userMessage = document.createElement('div');
+  userMessage.className = 'chat-message chat-message-user';
+  userMessage.textContent = question;
+  chatHistory.appendChild(userMessage);
+
+  // 2. Show loading spinner
+  const loadingMessage = document.createElement('div');
+  loadingMessage.className = 'chat-message chat-message-llm';
+  loadingMessage.innerHTML = `<div class="chat-spinner"></div>`;
+  chatHistory.appendChild(loadingMessage);
+
+  // 3. Scroll to bottom
+  chatHistory.scrollTop = chatHistory.scrollHeight;
+
+  // 4. Clear input
+  chatInput.value = '';
+
+  // 5. Call the new API endpoint
+  try {
+    const response = await fetch('/ask-question', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...taskIdentifier,
+        question: question
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error || "Server error");
+    }
+
+    const data = await response.json();
+    
+    // 6. Remove spinner and show answer
+    loadingMessage.innerHTML = data.answer; // Replace spinner with text
+
+  } catch (error) {
+    console.error("Error asking question:", error);
+    loadingMessage.innerHTML = `Sorry, an error occurred: ${error.message}`;
+  } finally {
+    // 7. Scroll to bottom again
+    chatHistory.scrollTop = chatHistory.scrollHeight;
+  }
+}
+
 
 // Helper function to build a section of the modal
 function buildAnalysisSection(title, content) {
