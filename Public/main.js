@@ -310,28 +310,17 @@ function buildAnalysisList(title, items, itemKey, sourceKey) {
   if (!items || items.length === 0) return '';
   
   const listItems = items.map(item => {
-    // --- MODIFICATION: Client-side URL parsing ---
-    const sourceText = item[sourceKey]; // e.g., "[https://example.com]" or "[example.com]" or "FileA.docx"
+    // --- MODIFICATION: Use the 'url' field from the server ---
+    const sourceText = item[sourceKey]; // e.g., "[example.com]"
+    const sourceUrl = item.url; // e.g., "https://example.com/article/nine" or null
     let sourceElement = '';
 
-    // Regex to find a URL-like string (http, www, or domain.com)
-    const urlRegex = /(https?:\/\/[^\s\]\)]+)|(www\.[^\s\]\)]+)|([a-zA-Z0-9\-\.]+\.(com|org|net|gov|edu|io|co)[^\s\]\)]*)/;
-    const match = sourceText.match(urlRegex);
-    
-    if (match) {
-      // A URL-like part was found
-      let url = match[1] || match[2] || match[3]; // Get the part that matched
-      let href = url;
-
-      // If it doesn't start with http, add it
-      if (!href.startsWith('http://') && !href.startsWith('https://')) {
-        href = `https://${href}`;
-      }
-      
-      // We render the *original* sourceText as the link text
-      sourceElement = `(Source: <a href="${href}" target="_blank" rel="noopener noreferrer">${sourceText}</a>)`;
+    // Check if sourceUrl is a valid, non-null string
+    if (sourceUrl && typeof sourceUrl === 'string' && (sourceUrl.startsWith('http') || sourceUrl.startsWith('www'))) {
+      // A valid URL was provided by the AI! Render a link.
+      sourceElement = `(Source: <a href="${sourceUrl}" target="_blank" rel="noopener noreferrer">${sourceText}</a>)`;
     } else {
-      // No URL found (e.g., "FileA.docx" or "[Source: Report X]"), just render plain text
+      // No valid URL, just render plain text
       sourceElement = `(Source: ${sourceText})`;
     }
 

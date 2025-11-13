@@ -84,10 +84,14 @@ app.post('/generate-chart', upload.array('researchFiles'), async (req, res) => {
       for (const file of sortedFiles) {
         researchTextCache += `\n\n--- Start of file: ${file.originalname} ---\n`;
         researchFilesCache.push(file.originalname);
+
+        // --- MODIFICATION: Use convertToHtml for .docx to preserve links ---
         if (file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-          const result = await mammoth.extractRawText({ buffer: file.buffer });
+          // We convert to HTML to keep <a href="..."> tags
+          const result = await mammoth.convertToHtml({ buffer: file.buffer });
           researchTextCache += result.value;
         } else {
+          // .md and .txt files are kept as raw text
           researchTextCache += file.buffer.toString('utf8');
         }
         researchTextCache += `\n--- End of file: ${file.originalname} ---\n`;
@@ -201,16 +205,25 @@ app.post('/get-task-analysis', async (req, res) => {
   }
 
   // 1. Define the "Analyst" prompt
-  // --- MODIFICATION: Simplified rule #2 for speed. Removed rule #3 (POPULATE URL) ---
+  // --- MODIFICATION: Updated rules for HTML/Markdown parsing ---
   const geminiSystemPrompt = `You are a senior project management analyst. Your job is to analyze the provided research and a user prompt to build a detailed analysis for *one single task*.
-
+  
+  The 'Research Content' may contain raw HTML (from .docx files) and Markdown (from .md files). You MUST parse these.
+  
   You MUST respond with *only* a valid JSON object matching the 'analysisSchema'.
   
   **CRITICAL RULES FOR ANALYSIS:**
   1.  **NO INFERENCE:** For 'taskName', 'facts', and 'assumptions', you MUST use key phrases and data extracted *directly* from the provided text.
-  2.  **CITE SOURCES (HIERARCHY):** You MUST find a source for every 'fact' and 'assumption'. Follow this logic:
-      a.  **PRIORITY 1 (Inline Citation):** First, search the research text *immediately near* the fact/assumption for a specific inline citation (e.g., text inside brackets \`[example.com]\`, \`[Source: Report X]\`, or parentheses \`(example.com)\`). If found, you MUST use this *full inline text* (e.g., "[example.com]", not "example.com") as the 'source' value.
-      b.  **PRIORITY 2 (Filename Fallback):** If and *only if* no specific inline citation is found, you MUST default to using the filename (e.g., "FileA.docx") as the 'source', which you can find in the \`--- Start of file: ... ---\` wrapper.
+  2.  **CITE SOURCES & URLS (HIERARCHY):** You MUST find a source and a URL (if possible) for every 'fact' and 'assumption'. Follow this logic:
+      a.  **PRIORITY 1 (HTML Link):** Search for an HTML \`<a>\` tag near the fact.
+          - 'source': The text inside the tag (e.g., "example.com").
+          - 'url': The \`href\` attribute (e.g., "https://example.com/article/nine").
+      b.  **PRIORITY 2 (Markdown Link):** Search for a Markdown link \`[text](url)\` near the fact.
+          - 'source': The \`text\` part.
+          - 'url': The \`url\` part.
+      c.  **PRIORITY 3 (Fallback):** If no link is found, use the filename as the 'source'.
+          - 'source': The filename (e.g., "FileA.docx") from the \`--- Start of file: ... ---\` wrapper.
+          - 'url': You MUST set this to \`null\`.
   3.  **DETERMINE STATUS:** Determine the task's 'status' ("completed", "in-progress", or "not-started") based on the current date (assume "November 2025") and the task's dates.
   4.  **PROVIDE RATIONALE:** You MUST provide a 'rationale' for 'in-progress' and 'not-started' tasks, analyzing the likelihood of on-time completion based on the 'facts' and 'assumptions'.
   5.  **CLEAN STRINGS:** All string values MUST be valid JSON strings. You MUST properly escape any characters that would break JSON, such as double quotes (\") and newlines (\\n).`;
@@ -220,7 +233,7 @@ app.post('/get-task-analysis', async (req, res) => {
   - Task Name: "${taskName}"`;
 
   // 2. Define the *single-task* schema
-  // --- MODIFICATION: Removed the 'url' field to speed up the AI ---
+  // --- MODIFICATION: Re-added the 'url' field ---
   const analysisSchema = {
     type: "OBJECT",
     properties: {
@@ -232,14 +245,22 @@ app.post('/get-task-analysis', async (req, res) => {
         type: "ARRAY",
         items: {
           type: "OBJECT",
-          properties: { fact: { type: "STRING" }, source: { type: "STRING" } }
+          properties: {
+            fact: { type: "STRING" },
+            source: { type: "STRING" },
+            url: { type: "STRING" } // Can be a URL string or null
+          }
         }
       },
       assumptions: {
         type: "ARRAY",
         items: {
           type: "OBJECT",
-          properties: { assumption: { type: "STRING" }, source: { type: "STRING" } }
+          properties: {
+            assumption: { type: "STRING" },
+            source: { type: "STRING" },
+            url: { type: "STRING" } // Can be a URL string or null
+          }
         }
       },
       rationale: { type: "STRING" }, // For 'in-progress' or 'not-started'
