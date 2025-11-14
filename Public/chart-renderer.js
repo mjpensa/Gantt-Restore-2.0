@@ -46,7 +46,7 @@ function setupChart(ganttData) {
   
   // Apply inline styles for positioning
   logoImg.style.position = 'absolute';
-  logoImg.style.top = '16px'; // Match title's vertical padding
+  logoImg.style.top = '24px'; // MODIFIED: Increased from 16px to 24px to move the logo down.
   logoImg.style.right = '24px'; // Padding from right edge
   logoImg.style.height = '40px'; // Slightly smaller than form logo
   logoImg.style.width = 'auto';
