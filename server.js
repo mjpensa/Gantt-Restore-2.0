@@ -184,7 +184,8 @@ app.post('/generate-chart', upload.array('researchFiles'), async (req, res) => {
           
   **6.  SANITIZATION:** All string values MUST be valid JSON strings. You MUST properly escape any characters that would break JSON, such as double quotes (\") and newlines (\\n), within the string value itself.`;
   
-  const geminiUserQuery = \`User Prompt: "${userPrompt}"\n\nResearch Content:\n${researchTextCache}\`;
+  const geminiUserQuery = `User Prompt: "${userPrompt}"\n\nResearch Content:\n${researchTextCache}`;
+
   // 3. Define the schema for the *visual data only*
   const ganttSchema = {
     type: "OBJECT",
