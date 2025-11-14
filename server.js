@@ -184,7 +184,12 @@ app.post('/generate-chart', upload.array('researchFiles'), async (req, res) => {
           
   **6.  SANITIZATION:** All string values MUST be valid JSON strings. You MUST properly escape any characters that would break JSON, such as double quotes (\") and newlines (\\n), within the string value itself.`;
   
-  const geminiUserQuery = `User Prompt: "${userPrompt}"\n\nResearch Content:\n${researchTextCache}`;
+  // --- FIX: Escape researchTextCache to prevent template literal syntax errors ---
+  const escapedResearchText = researchTextCache
+    .replace(/`/g, '\\`')       // Escape backticks
+    .replace(/\$\{/g, '\\${'); // Escape ${ sequences
+
+  const geminiUserQuery = `User Prompt: "${userPrompt}"\n\nResearch Content:\n${escapedResearchText}`;
 
   // 3. Define the schema for the *visual data only*
   const ganttSchema = {
@@ -293,7 +298,12 @@ app.post('/get-task-analysis', async (req, res) => {
   4.  **PROVIDE RATIONALE:** You MUST provide a 'rationale' for 'in-progress' and 'not-started' tasks, analyzing the likelihood of on-time completion based on the 'facts' and 'assumptions'.
   5.  **CLEAN STRINGS:** All string values MUST be valid JSON strings. You MUST properly escape any characters that would break JSON, such as double quotes (\") and newlines (\\n).`;
   
-  const geminiUserQuery = `Research Content:\n${researchTextCache}\n\n**YOUR TASK:** Provide a full, detailed analysis for this specific task:
+  // --- FIX: Escape researchTextCache to prevent template literal syntax errors ---
+  const escapedResearchText = researchTextCache
+    .replace(/`/g, '\\`')       // Escape backticks
+    .replace(/\$\{/g, '\\${'); // Escape ${ sequences
+
+  const geminiUserQuery = `Research Content:\n${escapedResearchText}\n\n**YOUR TASK:** Provide a full, detailed analysis for this specific task:
   - Entity: "${entity}"
   - Task Name: "${taskName}"`;
 
@@ -381,7 +391,12 @@ app.post('/ask-question', async (req, res) => {
   4.  **CONCISE:** Keep your answer concise and to the point.
   5.  **NO PREAMBLE:** Do not start your response with "Based on the research..." just answer the question directly.`;
   
-  const geminiUserQuery = `Research Content:\n${researchTextCache}\n\n**User Question:** ${question}`;
+  // --- FIX: Escape researchTextCache to prevent template literal syntax errors ---
+  const escapedResearchText = researchTextCache
+    .replace(/`/g, '\\`')       // Escape backticks
+    .replace(/\$\{/g, '\\${'); // Escape ${ sequences
+
+  const geminiUserQuery = `Research Content:\n${escapedResearchText}\n\n**User Question:** ${question}`;
 
   // 2. Define the payload (no schema, simple text generation)
   const payload = {
