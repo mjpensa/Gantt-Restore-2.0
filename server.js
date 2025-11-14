@@ -168,7 +168,16 @@ app.post('/generate-chart', upload.array('researchFiles'), async (req, res) => {
       - A task in "2022" has \`startCol: 3, endCol: 4\` (if 2020 is col 1).
       - If a date is "Q1 2024" and the interval is "Years", "2024" is the column. Map it to the "2024" column index.
       - If a date is unknown ("null"), the 'bar' object must be \`{ "startCol": null, "endCol": null, "color": "..." }\`.
-  5.  **COLORS:** Assign colors logically ("blue", "ochre", "orange", "green", "default").
+
+  **5.  INTELLIGENT COLORING (NEW IF/ELSE LOGIC):**
+      - **FIRST:** Analyze the *entire* dataset for 1-5 clear, cross-swimlane logical groupings (e.g., 'Task Type', 'Status', 'Team').
+      - **IF** you find strong logical groupings:
+          - You **MUST** populate the \`legend\` array with these groupings (e.g., \`[{"color": "blue", "label": "Regulatory Task"}]\`).
+          - You **MUST** color all bars in the \`data\` array according to this new legend.
+      - **ELSE** (if no logical groupings are found OR they are unclear):
+          - You **MUST** return an empty \`"legend": []\` array.
+          - You **MUST** color all bars in the \`data\` array based *only* on their swimlane. All tasks with \`entity: "Entity A"\` get one color, all tasks with \`entity: "Entity B"\` get another color, etc.
+          
   6.  **SANITIZATION:** All string values MUST be valid JSON strings. You MUST properly escape any characters that would break JSON, such as double quotes (\") and newlines (\\n), within the string value itself.`;
   
   const geminiUserQuery = `User Prompt: "${userPrompt}"\n\nResearch Content:\n${researchTextCache}`;
@@ -200,6 +209,19 @@ app.post('/generate-chart', upload.array('researchFiles'), async (req, res) => {
             }
           },
           required: ["title", "isSwimlane", "entity"]
+        }
+      },
+      // --- NEW: Added optional legend ---
+      legend: {
+        type: "ARRAY",
+        nullable: true, // Allow it to be omitted or null
+        items: {
+          type: "OBJECT",
+          properties: {
+            color: { type: "STRING" },
+            label: { type: "STRING" }
+          },
+          required: ["color", "label"]
         }
       }
     },
