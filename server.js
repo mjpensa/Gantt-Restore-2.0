@@ -276,8 +276,9 @@ app.post('/get-task-analysis', async (req, res) => {
     type: "OBJECT",
     properties: {
       taskName: { type: "STRING" },
-      startDate: { type: "STRING" },
-      endDate: { type: "STRING" },
+      // FIX: Allow startDate/endDate to be string or null
+      startDate: { anyOf: [{ type: "STRING" }, { type: "NULL" }] },
+      endDate: { anyOf: [{ type: "STRING" }, { type: "NULL" }] },
       status: { type: "STRING", enum: ["completed", "in-progress", "not-started", "n/a"] },
       facts: {
         type: "ARRAY",
@@ -286,7 +287,8 @@ app.post('/get-task-analysis', async (req, res) => {
           properties: {
             fact: { type: "STRING" },
             source: { type: "STRING" },
-            url: { type: "STRING" } // Can be a URL string or null
+            // FIX: Allow URL to be string or null, as instructed in the system prompt
+            url: { anyOf: [{ type: "STRING" }, { type: "NULL" }] } 
           }
         }
       },
@@ -297,7 +299,8 @@ app.post('/get-task-analysis', async (req, res) => {
           properties: {
             assumption: { type: "STRING" },
             source: { type: "STRING" },
-            url: { type: "STRING" } // Can be a URL string or null
+            // FIX: Allow URL to be string or null, as instructed in the system prompt
+            url: { anyOf: [{ type: "STRING" }, { type: "NULL" }] } 
           }
         }
       },
