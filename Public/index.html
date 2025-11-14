@@ -42,18 +42,18 @@
     
     <!-- 5. Add custom styles -->
     <style>
-        /* Apply the custom text color globally */
-        body, h1, h2, p, div, span, label, input::placeholder, textarea::placeholder {
-            color: #0c2340;
+        /* Apply the custom text color globally to WHITE (#FFFFFF) */
+        body, h1, h2, p, div, span, label {
+            color: #FFFFFF; 
         }
 
-        /* Style the placeholder with the custom color and slight opacity */
+        /* Style the placeholder with the white color and slight opacity */
         .custom-placeholder::placeholder {
-            color: #0c2340;
-            opacity: 0.6;
+            color: #FFFFFF;
+            opacity: 0.5;
         }
 
-        /* Custom focus ring for form elements */
+        /* Custom focus ring for form elements (Keeping red outline) */
         .custom-focus:focus {
             outline: none;
             border-color: transparent;
@@ -61,10 +61,11 @@
         }
     </style>
 </head>
-<body class="bg-gray-50 font-sans relative min-h-screen overflow-hidden">
+<body class="bg-[#0c2340] font-sans relative min-h-screen overflow-hidden">
 
     <!-- 
       Dynamic Roadmap Background SVG
+      The lines and dots use the color defined in the JS animation script below, which is already the requested red (#da291c).
     -->
     <svg id="roadmap-svg" class="absolute w-full -z-10" preserveAspectRatio="none">
         <!-- Lines will be dynamically added here by JS -->
@@ -76,12 +77,11 @@
     <!-- Main container -->
     <div class="relative min-h-screen flex flex-col items-center justify-center p-6 md:p-12">
 
-        <!-- OLD LOGO HEADER REMOVED HERE -->
-
         <!-- Content -->
         <main class="w-full max-w-3xl z-10">
             <!-- Header Text -->
-            <div class="text-center mb-10" id="title-block">
+            <!-- Ensure title block text is white if global style fails -->
+            <div class="text-center mb-10 text-white" id="title-block">
                 <h1 class="text-4xl md:text-5xl font-bold mb-3">
                     Research Roadmap Generator
                 </h1>
@@ -92,24 +92,24 @@
 
             <!-- 
               Main Form
-              The form is now set to 'relative' and contains the logo.
+              The form background is now set to very dark grey (#1B1A1A).
             -->
-            <form id="gantt-form" class="bg-white rounded-2xl shadow-xl p-8 md:p-12 w-full relative">
+            <form id="gantt-form" class="bg-[#1B1A1A] rounded-2xl shadow-xl p-8 md:p-12 w-full relative">
                 
                 <!-- NEW LOGO HEADER ADDED HERE -->
                 <header class="absolute top-0 right-0 p-8 md:p-12">
-                    <!-- LOGO SIZE CHANGED BACK TO h-12 -->
+                    <!-- LOGO SIZE is h-12 -->
                     <img src="/bip_logo.png" alt="BIP Logo" class="h-12 w-auto">
                 </header>
 
                 <!-- Project Instructions Section -->
-                <!-- MARGIN CHANGED TO mt-20 -->
                 <section class="mt-20">
                     <h2 class="text-2xl font-semibold mb-4">
                         Project Instructions
                     </h2>
                     
-                    <textarea id="prompt-input" rows="4" class="w-full p-4 border border-gray-300 rounded-lg resize-none custom-placeholder custom-focus transition-shadow" 
+                    <!-- Added bg-gray-800 for dark field background and text-white for input text -->
+                    <textarea id="prompt-input" rows="4" class="w-full p-4 border border-gray-300 rounded-lg resize-none custom-placeholder custom-focus transition-shadow bg-gray-800 text-white border-gray-600" 
                               placeholder="Describe your project goals, timeline preferences, key milestones, or any specific requirements for the roadmap generation..."></textarea>
                 </section>
                 
@@ -127,7 +127,7 @@
                         
                         <!-- MODIFICATION: Added container for the default prompt -->
                         <div id="dropzone-prompt" class="flex flex-col items-center justify-center">
-                            <!-- Upload Icon SVG (color set to custom-text) -->
+                            <!-- Upload Icon SVG (color set to custom-text, which is now white via global style) -->
                             <svg class="w-12 h-12 opacity-80" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
                             </svg>
@@ -190,23 +190,24 @@
             let titleEl, formEl, svg, linesGroup, pointsGroup;
 
             // --- Animation Parameters ---
-            const pointColor = 'rgba(218, 41, 28, 0.4)'; // #da291c
-            const lineColor = 'rgba(218, 41, 28, 0.3)';  // #da291c
-            const numMilestonesPerSide = 3; // 3 dots on each side
+            // These already use the requested red color base (#da291c)
+            const pointColor = 'rgba(218, 41, 28, 0.4)'; 
+            const lineColor = 'rgba(218, 41, 28, 0.3)';
+            const numMilestonesPerSide = 3; 
             const pointRadius = 5;
-            const zigZagAmount = 80; // How much horizontal variation
+            const zigZagAmount = 80;
 
             // --- Animation State ---
-            let milestones = []; // Array of {x, y, length} milestone coordinates
-            let milestoneElements = []; // Array of <circle> elements
-            let tracerPath; // The single <path> element for the moving line
+            let milestones = []; 
+            let milestoneElements = []; 
+            let tracerPath; 
             let totalPathLength = 0;
             
             // Animation state for Draw-On / Recede effect
-            let animationPhase = "drawing"; // "drawing" or "receding"
+            let animationPhase = "drawing"; 
             let headPosition = 0;
             let tailPosition = 0;
-            const animationSpeed = 2; // Speed for both drawing and receding
+            const animationSpeed = 2;
 
             // SVG Namespace for creating elements
             const svgNS = "http://www.w3.org/2000/svg";
@@ -229,13 +230,13 @@
                 
                 const cardLeft = formRect.left;
                 const cardRight = formRect.right;
-                const gutterLeft = cardLeft * 0.5; // Center of left gutter
-                const gutterRight = cardLeft + (window.innerWidth - cardRight) * 0.5; // Center of right gutter
+                const gutterLeft = cardLeft * 0.5;
+                const gutterRight = cardLeft + (window.innerWidth - cardRight) * 0.5;
                 
                 const numTotalMilestones = numMilestonesPerSide * 2;
                 const verticalSpacing = availableHeight / (numMilestonesPerSide + 1);
 
-                milestones = []; // Clear old milestones
+                milestones = [];
                 
                 // Add virtual start point
                 milestones.push({ x: -200, y: verticalSpacing, length: 0 });
@@ -247,15 +248,15 @@
                     milestones.push({ x, y, length: 0 });
                 }
                 
-                // Add right-side dots (BOTTOM to TOP) - This is the reverted logic
+                // Add right-side dots (BOTTOM to TOP)
                 for (let i = 0; i < numMilestonesPerSide; i++) {
                     const x = gutterRight + (Math.random() - 0.5) * zigZagAmount;
-                    const y = verticalSpacing * (numMilestonesPerSide - i); // <-- Reverted
+                    const y = verticalSpacing * (numMilestonesPerSide - i);
                     milestones.push({ x, y, length: 0 });
                 }
 
                 // Add virtual end point
-                milestones.push({ x: window.innerWidth + 200, y: verticalSpacing, length: 0 }); // <-- Reverted
+                milestones.push({ x: window.innerWidth + 200, y: verticalSpacing, length: 0 });
                 
                 // Path has changed, rebuild it
                 buildStaticPath();
