@@ -76,10 +76,7 @@
     <!-- Main container -->
     <div class="relative min-h-screen flex flex-col items-center justify-center p-6 md:p-12">
 
-        <!-- New Logo Header (UPDATED HERE) -->
-        <header class="absolute top-8 left-8 md:top-12 md:left-12">
-            <img src="/bip_logo.png" alt="BIP Logo" class="h-12 w-auto">
-        </header>
+        <!-- OLD LOGO HEADER REMOVED HERE -->
 
         <!-- Content -->
         <main class="w-full max-w-3xl z-10">
@@ -95,9 +92,15 @@
 
             <!-- 
               Main Form
+              The form is now set to 'relative' and contains the logo.
             -->
-            <form id="gantt-form" class="bg-white rounded-2xl shadow-xl p-8 md:p-12 w-full">
+            <form id="gantt-form" class="bg-white rounded-2xl shadow-xl p-8 md:p-12 w-full relative">
                 
+                <!-- NEW LOGO HEADER ADDED HERE -->
+                <header class="absolute top-0 right-0 p-8 md:p-12">
+                    <img src="/bip_logo.png" alt="BIP Logo" class="h-12 w-auto">
+                </header>
+
                 <!-- Project Instructions Section -->
                 <section class="mt-8">
                     <h2 class="text-2xl font-semibold mb-4">
