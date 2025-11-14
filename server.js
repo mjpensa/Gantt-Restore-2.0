@@ -176,15 +176,15 @@ app.post('/generate-chart', upload.array('researchFiles'), async (req, res) => {
       - The \`bar\` object **MUST** be created for every task.
       - 'startCol' is the 1-based index of the 'timeColumns' array where the task begins.
       - 'endCol' is the 1-based index of the 'timeColumns' array where the task ends, **PLUS ONE**.
-      - If a date is unknown ("null"), the 'bar' object **MUST** be \`{ "startCol": null, "endCol": null, "color": "default" }\`.
+      - If a date is unknown ("null"), the 'bar' object **MUST** be \`{ "startCol": null, "endCol": null, "color": "blue" }\`. (Using "blue" as the new default).
       - **COLORING:**
+          - Use *only* these colors: "blue", "ochre", "orange", "green".
           - If you chose **PATH 1** (Legend): Assign the 'color' value based on the logical grouping you defined in the legend.
           - If you chose **PATH 2** (No Legend): Assign the 'color' value based on the task's swimlane ('entity'). All tasks with the same 'entity' must have the same color.
           
   **6.  SANITIZATION:** All string values MUST be valid JSON strings. You MUST properly escape any characters that would break JSON, such as double quotes (\") and newlines (\\n), within the string value itself.`;
   
-  const geminiUserQuery = `User Prompt: "${userPrompt}"\n\nResearch Content:\n${researchTextCache}`;
-
+  const geminiUserQuery = \`User Prompt: "${userPrompt}"\n\nResearch Content:\n${researchTextCache}\`;
   // 3. Define the schema for the *visual data only*
   const ganttSchema = {
     type: "OBJECT",
