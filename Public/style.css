@@ -123,7 +123,7 @@
 .gantt-bar[data-color="ochre"] { background-color: #EE9E20; } /* Gold/Ochre */
 .gantt-bar[data-color="orange"] { background-color: #BA3930; } /* Red */
 .gantt-bar[data-color="green"] { background-color: #50AF7B; } /* Green */
-.gantt-bar[data-color="default"] { background-color: #874E61; } /* Default/Purple */
+/* Removed the "default" color */
 
 /* Note: The five color names map to the first five colors you provided. 
    I used #874E61 for the 'default' color as a sixth distinct color in the palette. */
@@ -483,4 +483,4 @@
 .legend-color-swatch[data-color="ochre"] { background-color: #EE9E20; }
 .legend-color-swatch[data-color="orange"] { background-color: #BA3930; }
 .legend-color-swatch[data-color="green"] { background-color: #50AF7B; }
-.legend-color-swatch[data-color="default"] { background-color: #874E61; }
+/* Removed the "default" color */
