@@ -60,6 +60,12 @@
             border-color: transparent;
             box-shadow: 0 0 0 2px #da291c; /* Use box-shadow for a ring effect */
         }
+        
+        /* New: Style for scaling the content on hover */
+        .dropzone-container:hover .dropzone-content {
+             /* Scale the content up slightly on hover */
+             transform: scale(1.03); 
+        }
     </style>
 </head>
 <body class="bg-[#0c2340] font-sans relative min-h-screen overflow-hidden">
@@ -122,11 +128,11 @@
                     <!-- 
                       File Dropzone / Input
                     -->
-                    <!-- MODIFICATION: Added min-h-[250px] to prevent layout shift -->
-                    <label for="file-input" class="border-2 border-dashed border-custom-outline rounded-lg p-10 md:p-12 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50 transition-colors min-h-[250px]">
+                    <!-- MODIFICATION 1: Removed hover:bg-gray-50. Added group class (dropzone-container) for CSS targeting. -->
+                    <label for="file-input" class="border-2 border-dashed border-custom-outline rounded-lg p-10 md:p-12 flex flex-col items-center justify-center text-center cursor-pointer transition-colors min-h-[250px] dropzone-container">
                         
-                        <!-- MODIFICATION: Added container for the default prompt -->
-                        <div id="dropzone-prompt" class="flex flex-col items-center justify-center">
+                        <!-- MODIFICATION 2: Added transition and group-hover:scale-105 for the effect. Changed id to class (dropzone-content) for styling. -->
+                        <div id="dropzone-prompt" class="flex flex-col items-center justify-center dropzone-content transition-transform duration-300 ease-in-out">
                             <!-- Upload Icon SVG (color set to custom-text, which is now white via global style) -->
                             <svg class="w-12 h-12 opacity-80" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
