@@ -3,6 +3,22 @@
  * It handles form submission, API calls, and chart rendering.
  */
 
+// Define supported file types for frontend validation
+const SUPPORTED_FILE_MIMES = [
+    'text/markdown',
+    'text/plain',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+];
+const SUPPORTED_FILE_EXTENSIONS = ['.md', '.txt', '.docx'];
+const SUPPORTED_FILES_STRING = SUPPORTED_FILE_EXTENSIONS.join(', ');
+
+// --- Helper function to display errors ---
+function displayError(message) {
+    const errorMessage = document.getElementById('error-message');
+    errorMessage.textContent = message;
+    errorMessage.style.display = 'block';
+}
+
 // --- Event Listeners ---
 document.addEventListener("DOMContentLoaded", () => {
   const ganttForm = document.getElementById('gantt-form');
@@ -15,21 +31,61 @@ document.addEventListener("DOMContentLoaded", () => {
   const fileList = document.getElementById('file-list');
 
   fileInput.addEventListener('change', () => {
+    // Clear previous errors
+    document.getElementById('error-message').style.display = 'none';
+
     if (fileInput.files.length > 0) {
-      // Files are selected
+      const files = Array.from(fileInput.files);
+      let validFiles = [];
+      let invalidFiles = [];
+
+      // 1. Validate files
+      for (const file of files) {
+        // Check mime type (preferred) or rely on extension fallback
+        const isValidMime = SUPPORTED_FILE_MIMES.includes(file.type);
+        const isValidExtension = SUPPORTED_FILE_EXTENSIONS.some(ext => file.name.toLowerCase().endsWith(ext));
+
+        if (isValidMime || isValidExtension) {
+          validFiles.push(file);
+        } else {
+          invalidFiles.push(file.name);
+        }
+      }
+
+      // 2. Handle invalid files
+      if (invalidFiles.length > 0) {
+        const errorMsg = `The following files are not supported: ${invalidFiles.join(', ')}. Please upload only ${SUPPORTED_FILES_STRING} files.`;
+        displayError(errorMsg);
+        
+        // Reset the input field completely to prevent submission of bad files
+        fileInput.value = '';
+        
+        // Restore dropzone prompt
+        dropzonePrompt.classList.remove('hidden');
+        fileListContainer.classList.add('hidden');
+        return;
+      }
+
+      // 3. If files are valid, update the list display
       fileList.innerHTML = ''; // Clear previous list
       
-      for (const file of fileInput.files) {
+      // We must create a new FileList object that only contains the valid files
+      const dataTransfer = new DataTransfer();
+      for (const file of validFiles) {
         const li = document.createElement('li');
-        // Use truncate class from Tailwind
         li.className = 'truncate'; 
         li.textContent = file.name;
         li.title = file.name; // Show full name on hover
         fileList.appendChild(li);
+        dataTransfer.items.add(file); // Add valid file to the DataTransfer
       }
       
+      // Update the input field's files property with the clean list
+      fileInput.files = dataTransfer.files;
+
       dropzonePrompt.classList.add('hidden');
       fileListContainer.classList.remove('hidden');
+
     } else {
       // No files selected
       dropzonePrompt.classList.remove('hidden');
@@ -54,13 +110,17 @@ async function handleChartGenerate(event) {
   const promptInput = document.getElementById('prompt-input');
   const fileInput = document.getElementById('file-input');
   
-  // --- MODIFICATION: Check if files are uploaded ---
+  // Check if files are uploaded
   if (fileInput.files.length === 0) {
-    errorMessage.textContent = 'Error: Please upload at least one research document.';
-    errorMessage.style.display = 'block';
+    displayError('Error: Please upload at least one research document.');
     return;
   }
-  // ---
+  
+  // Check if prompt is empty (optional but good practice)
+  if (!promptInput.value.trim()) {
+      displayError('Error: Please provide project instructions in the prompt.');
+      return;
+  }
 
   const formData = new FormData();
   formData.append('prompt', promptInput.value);
@@ -94,21 +154,19 @@ async function handleChartGenerate(event) {
       throw new Error('Invalid chart data structure received from server');
     }
 
-    // --- MODIFICATION: Add stronger validation for empty data ---
+    // Check for empty data
     if (ganttData.timeColumns.length === 0 || ganttData.data.length === 0) {
       console.warn("AI returned valid but empty data.", ganttData);
       throw new Error('The AI was unable to find any tasks or time columns in the provided documents. Please check your files or try a different prompt.');
     }
-    // --- END: New validation ---
 
-    // 6. --- MODIFICATION: Open in new tab instead of rendering here ---
+    // 6. Open in new tab
     // Store the data in sessionStorage so the new tab can access it
     sessionStorage.setItem('ganttData', JSON.stringify(ganttData));
     
     // Open chart.html in a new tab
     window.open('/chart.html', '_blank');
     
-    // --- REMOVED: setupChart(ganttData); ---
 
   } catch (error) {
     console.error("Error generating chart:", error);
@@ -120,5 +178,3 @@ async function handleChartGenerate(event) {
     loadingIndicator.style.display = 'none';
   }
 }
-
-// --- ALL OTHER FUNCTIONS MOVED to chart-renderer.js ---
