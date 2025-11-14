@@ -13,13 +13,13 @@
 /* 6. Gantt Chart Container */
 #gantt-chart-container {
   width: 100%;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #0D0D0D; /* Darker border (using grid line color) */
   border-radius: 8px;
-  background-color: #ffffff;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  background-color: #282828; /* Chart Background */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   overflow: hidden;
   margin-top: 24px;
-  font-family: 'Inter', sans-serif; /* Add font */
+  font-family: 'Inter', sans-serif;
 }
 
 /* 7. Chart Title */
@@ -28,8 +28,8 @@
   font-size: 20px;
   font-weight: 600;
   padding: 16px;
-  border-bottom: 1px solid #e0e0e0;
-  color: #111827; /* Add color */
+  border-bottom: 1px solid #0D0D0D; /* Grid line color */
+  color: #FFFFFF; /* Text Color */
 }
 
 /* 8. Main Grid Layout */
@@ -45,10 +45,10 @@
   font-weight: 500;
   padding: 12px 8px;
   text-align: center;
-  background-color: #f9fafb;
-  border-bottom: 1px solid #e0e0e0;
-  border-left: 1px solid #e0e0e0;
-  color: #111827; /* Add color */
+  background-color: #282828; /* Match chart background */
+  border-bottom: 1px solid #0D0D0D; /* Grid line color */
+  border-left: 1px solid #0D0D0D; /* Grid line color */
+  color: #FFFFFF; /* Text Color */
 }
 .gantt-header-label { /* First header cell (empty) */
   border-left: 0;
@@ -58,27 +58,27 @@
 .gantt-row-label {
   padding: 10px 12px;
   font-size: 13px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #0D0D0D; /* Grid line color */
   white-space: normal; 
   overflow-wrap: break-word;
 }
 
 .gantt-row-label.swimlane {
   font-weight: 600; /* BOLD SWIMLANE */
-  color: #000;
-  background-color: #E5E7EB; /* Light grey swimlane background */
+  color: #FFFFFF; /* Text Color */
+  background-color: #1A1A1A; /* Slightly darker swimlane background */
 }
 
 .gantt-row-label.task {
   padding-left: 24px; /* THIS is our indent */
   font-weight: 400;
-  color: #333;
-  border-bottom: 1px dotted #e0e0e0;
+  color: #FFFFFF; /* Text Color */
+  border-bottom: 1px solid #0D0D0D; /* Grid line color */
   transition: background-color 0.2s;
 }
 
 .gantt-row-label.task:hover {
-  background-color: #f0f8ff; /* Light alice blue */
+  background-color: #383838; /* Light hover effect */
   cursor: pointer;
 }
 
@@ -86,22 +86,22 @@
 .gantt-bar-area {
   position: relative; 
   display: grid;
-  border-left: 1px solid #e0e0e0;
-  border-bottom: 1px dotted #e0e0e0;
+  border-left: 1px solid #0D0D0D; /* Grid line color */
+  border-bottom: 1px solid #0D0D0D; /* Grid line color */
 }
 .gantt-bar-area.task:hover {
-  background-color: #f0f8ff;
+  background-color: #383838; /* Match label hover */
   cursor: pointer;
 }
 
 .gantt-bar-area.swimlane {
-  background-color: #E5E7EB; /* Match the label background */
-  border-bottom: 1px solid #f0f0f0; /* Match label border */
+  background-color: #1A1A1A; /* Match the label background */
+  border-bottom: 1px solid #0D0D0D; /* Match label border */
 }
 
 /* Vertical grid lines */
 .gantt-bar-area span[data-col] {
-  border-right: 1px solid #f0f0f0;
+  border-right: 1px solid #0D0D0D; /* Grid line color */
 }
 
 /* 12. The Actual Bar */
@@ -116,12 +116,15 @@
   grid-row: 1; /* Always on the first (and only) row of its container */
 }
 
-/* Bar Colors */
-.gantt-bar[data-color="blue"] { background-color: #008FFB; }
-.gantt-bar[data-color="ochre"] { background-color: #FEB019; }
-.gantt-bar[data-color="orange"] { background-color: #FF4560; }
-.gantt-bar[data-color="green"] { background-color: #00E396; }
-.gantt-bar[data-color="default"] { background-color: #6B7280; } /* Fallback color */
+/* Bar Colors (Updated to Dark Mode Palette) */
+.gantt-bar[data-color="blue"] { background-color: #2E7BB1; } /* Dark Blue */
+.gantt-bar[data-color="ochre"] { background-color: #EE9E20; } /* Gold/Ochre */
+.gantt-bar[data-color="orange"] { background-color: #BA3930; } /* Red */
+.gantt-bar[data-color="green"] { background-color: #50AF7B; } /* Green */
+.gantt-bar[data-color="default"] { background-color: #874E61; } /* Default/Purple */
+
+/* Note: The five color names map to the first five colors you provided. 
+   I used #874E61 for the 'default' color as a sixth distinct color in the palette. */
 
 /* 13. Export Button Styling */
 .export-container {
@@ -135,7 +138,7 @@
   font-size: 14px;
   font-weight: 600;
   color: #ffffff;
-  background-color: #10B981; /* Green */
+  background-color: #50AF7B; /* Use one of the new dark mode colors (Green) */
   border: none;
   border-radius: 6px;
   padding: 10px 20px;
@@ -144,10 +147,10 @@
   transition: background-color 0.2s;
 }
 .export-button:hover {
-  background-color: #059669;
+  background-color: #3C8D62;
 }
 .export-button:disabled {
-  background-color: #a0aec0;
+  background-color: #4a4a4a;
   cursor: not-allowed;
 }
 
@@ -157,15 +160,14 @@
 .gantt-today-line {
   position: absolute;
   width: 1px; /* Thin red line */
-  background-color: #FF4560; /* Red (same as 'orange' bar) */
+  background-color: #BA3930; /* Use Red color from new palette */
   z-index: 3; /* Above bars (bars are z-index 2) */
   /* 'top', 'bottom', and 'left' are set by JavaScript */
 }
 
 
 /* ------------------------------------------------------------------- */
-/* --- ANALYSIS MODAL STYLES --- */
-/* These are applied by main.js when building the modal */
+/* --- ANALYSIS MODAL STYLES (Adjusted for Dark Mode) --- */
 /* ------------------------------------------------------------------- */
 
 .modal-overlay {
@@ -174,7 +176,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.7); /* Darker overlay */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -185,16 +187,16 @@
 }
 
 .modal-content {
-  background-color: #ffffff;
+  background-color: #1A1A1A; /* Dark Modal Background */
   border-radius: 8px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
   width: 100%;
   max-width: 700px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  color: #111827; /* Default text color */
+  color: #FFFFFF; /* Default text color */
 }
 
 .modal-header {
@@ -202,20 +204,20 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 24px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #383838; /* Darker separator */
 }
 
 .modal-title {
   font-size: 18px;
   font-weight: 600;
-  color: #111827;
+  color: #FFFFFF;
   margin: 0;
 }
 
 .modal-close {
   font-size: 28px;
   font-weight: 300;
-  color: #9ca3af;
+  color: #AAAAAA; /* Light grey close button */
   background: none;
   border: none;
   cursor: pointer;
@@ -223,20 +225,20 @@
   line-height: 1;
 }
 .modal-close:hover {
-  color: #111827;
+  color: #FFFFFF;
 }
 
 .modal-body {
   padding: 24px;
   overflow-y: auto;
-  color: #111827;
+  color: #FFFFFF;
 }
 
 .modal-spinner {
   width: 32px;
   height: 32px;
-  border: 4px solid #e5e7eb;
-  border-top-color: #007bff;
+  border: 4px solid #383838;
+  border-top-color: #50AF7B; /* Green accent */
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 40px auto;
@@ -247,7 +249,7 @@
 }
 
 .modal-error {
-  color: #b91c1c;
+  color: #BA3930;
   font-weight: 500;
   text-align: center;
   padding: 20px;
@@ -263,16 +265,16 @@
 .analysis-section h4 {
   font-size: 14px;
   font-weight: 600;
-  color: #111827;
+  color: #FFFFFF;
   margin-top: 0;
   margin-bottom: 8px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid #383838; /* Darker separator */
   padding-bottom: 4px;
 }
 
 .analysis-section p {
   font-size: 14px;
-  color: #374151;
+  color: #CCCCCC; /* Lighter text for body */
   line-height: 1.6;
   margin: 0;
 }
@@ -285,21 +287,22 @@
   border-radius: 999px;
   text-transform: capitalize;
 }
+/* Re-mapped status colors for dark background contrast */
 .status-pill.status-completed {
-  color: #065f46;
-  background-color: #d1fae5;
+  color: #50AF7B; /* Green text */
+  background-color: #1A3025; /* Dark Green background */
 }
 .status-pill.status-in-progress {
-  color: #92400e;
-  background-color: #fef3c7;
+  color: #EE9E20; /* Ochre text */
+  background-color: #382A13; /* Dark Ochre background */
 }
 .status-pill.status-not-started {
-  color: #991b1b;
-  background-color: #fee2e2;
+  color: #BA3930; /* Red text */
+  background-color: #2F120F; /* Dark Red background */
 }
 .status-pill.status-n\/a {
-  color: #374151;
-  background-color: #f3f4f6;
+  color: #AAAAAA;
+  background-color: #383838;
 }
 
 
@@ -310,7 +313,7 @@
 }
 .analysis-list li {
   padding: 8px 0;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid #383838; /* Darker separator */
 }
 .analysis-list li:last-child {
   border-bottom: 0;
@@ -318,40 +321,39 @@
 .analysis-list li p {
   margin: 0;
   font-size: 14px;
-  color: #374151;
+  color: #CCCCCC;
 }
 .analysis-list li .source {
   font-size: 12px;
-  color: #6b7280;
+  color: #888888;
   font-style: italic;
 }
 
 .analysis-list li .source a {
-  color: #007bff; /* Standard link blue */
+  color: #2E7BB1; /* Dark Blue link */
   text-decoration: underline;
   cursor: pointer;
   font-style: italic; /* Maintain italic style */
 }
 .analysis-list li .source a:hover {
-  color: #0056b3; /* Darker blue on hover */
+  color: #66A3D9; /* Lighter blue on hover */
 }
 
 
 /* ------------------------------------------------------------------- */
-/* --- CHAT INTERFACE STYLES --- */
-/* These are applied by main.js when building the modal */
+/* --- CHAT INTERFACE STYLES (Adjusted for Dark Mode) --- */
 /* ------------------------------------------------------------------- */
 
 .chat-container {
   margin-top: 24px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid #383838;
   padding-top: 20px;
 }
 
 .chat-title {
   font-size: 14px;
   font-weight: 600;
-  color: #111827;
+  color: #FFFFFF;
   margin-top: 0;
   margin-bottom: 12px;
 }
@@ -360,10 +362,10 @@
   height: 150px;
   max-height: 150px;
   overflow-y: auto;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #383838;
   border-radius: 6px;
   padding: 12px;
-  background-color: #f9fafb;
+  background-color: #282828; /* Match chart background */
   margin-bottom: 12px;
 }
 
@@ -380,15 +382,15 @@
 }
 
 .chat-message-user {
-  background-color: #dbeafe; /* Light blue */
-  color: #1e40af;
+  background-color: #2E7BB1; /* Dark Blue */
+  color: #FFFFFF;
   margin-left: auto;
   text-align: right;
 }
 
 .chat-message-llm {
-  background-color: #e5e7eb; /* Light grey */
-  color: #374151;
+  background-color: #383838; /* Dark Grey */
+  color: #FFFFFF;
   margin-right: auto;
   text-align: left;
 }
@@ -396,8 +398,8 @@
 .chat-spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid #a0aec0;
-  border-top-color: #374151;
+  border: 2px solid #555555;
+  border-top-color: #AAAAAA;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   display: inline-block; 
@@ -412,10 +414,11 @@
   flex-grow: 1;
   font-family: 'Inter', sans-serif;
   font-size: 14px;
-  border: 1px solid #d1d5db;
+  border: 1px solid #383838;
   border-radius: 6px;
   padding: 8px 12px;
-  color: #111827; /* Ensure text input is the right color */
+  color: #FFFFFF;
+  background-color: #282828;
 }
 
 .chat-send-btn {
@@ -423,7 +426,7 @@
   font-size: 14px;
   font-weight: 600;
   color: #ffffff;
-  background-color: #007bff;
+  background-color: #2E7BB1; /* Dark Blue send button */
   border: none;
   border-radius: 6px;
   padding: 8px 16px;
@@ -431,5 +434,5 @@
   transition: background-color 0.2s;
 }
 .chat-send-btn:hover {
-  background-color: #0056b3;
+  background-color: #1F6AA1;
 }
