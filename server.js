@@ -211,8 +211,9 @@ app.post('/generate-chart', upload.array('researchFiles'), async (req, res) => {
             bar: {
               type: "OBJECT",
               properties: {
-                startCol: { type: "NUMBER" },
-                endCol: { type: "NUMBER" },
+                // --- FIX: Allow startCol and endCol to be number or null ---
+                startCol: { anyOf: [{ type: "NUMBER" }, { type: "NULL" }] },
+                endCol: { anyOf: [{ type: "NUMBER" }, { type: "NULL" }] },
                 color: { type: "STRING" }
               },
             }
