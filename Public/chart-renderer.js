@@ -31,10 +31,6 @@ function setupChart(ganttData) {
   // Clear container
   container.innerHTML = '';
 
-  // --- NEW: Add console log for debugging ---
-  console.log("Data received from server:", ganttData);
-  // --- END NEW ---
-
   // Create the main chart wrapper
   const chartWrapper = document.createElement('div');
   chartWrapper.id = 'gantt-chart-container'; // ID for styling & export
