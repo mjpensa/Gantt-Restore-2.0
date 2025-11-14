@@ -7,6 +7,36 @@
 document.addEventListener("DOMContentLoaded", () => {
   const ganttForm = document.getElementById('gantt-form');
   ganttForm.addEventListener('submit', handleChartGenerate);
+
+  // --- NEW: File input listener ---
+  const fileInput = document.getElementById('file-input');
+  const dropzonePrompt = document.getElementById('dropzone-prompt');
+  const fileListContainer = document.getElementById('file-list-container');
+  const fileList = document.getElementById('file-list');
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files.length > 0) {
+      // Files are selected
+      fileList.innerHTML = ''; // Clear previous list
+      
+      for (const file of fileInput.files) {
+        const li = document.createElement('li');
+        // Use truncate class from Tailwind
+        li.className = 'truncate'; 
+        li.textContent = file.name;
+        li.title = file.name; // Show full name on hover
+        fileList.appendChild(li);
+      }
+      
+      dropzonePrompt.classList.add('hidden');
+      fileListContainer.classList.remove('hidden');
+    } else {
+      // No files selected
+      dropzonePrompt.classList.remove('hidden');
+      fileListContainer.classList.add('hidden');
+    }
+  });
+  // --- END: File input listener ---
 });
 
 /**
@@ -24,6 +54,14 @@ async function handleChartGenerate(event) {
   const promptInput = document.getElementById('prompt-input');
   const fileInput = document.getElementById('file-input');
   
+  // --- MODIFICATION: Check if files are uploaded ---
+  if (fileInput.files.length === 0) {
+    errorMessage.textContent = 'Error: Please upload at least one research document.';
+    errorMessage.style.display = 'block';
+    return;
+  }
+  // ---
+
   const formData = new FormData();
   formData.append('prompt', promptInput.value);
   for (const file of fileInput.files) {
@@ -344,7 +382,7 @@ function findTodayColumnPosition(today, timeColumns) {
 /**
  * Gets the ISO 8601 week number for a given date.
  * @param {Date} date - The date.
- * @returns {number} The week number.
+ *S @returns {number} The week number.
  */
 function getWeek(date) {
   var d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
