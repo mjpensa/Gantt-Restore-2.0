@@ -158,27 +158,30 @@ app.post('/generate-chart', upload.array('researchFiles'), async (req, res) => {
       - 4-12 months total: Use "Months" (e.g., ["Jan 2026", "Feb 2026"])
       - 1-3 years total: Use "Quarters" (e.g., ["Q1 2026", "Q2 2026"])
       - 3+ years total: You MUST use "Years" (e.g., ["2020", "2021", "2022"])
-  3.  **CHART DATA:** Create the 'data' array.
-      - First, identify all logical swimlanes (e.g., "Regulatory Drivers", "JPMorgan Chase"). Add an object for each: \`{ "title": "Swimlane Name", "isSwimlane": true, "entity": "Swimlane Name" }\`
-      - Immediately after each swimlane, add all tasks that belong to it: \`{ "title": "Task Name", "isSwimlane": false, "entity": "Swimlane Name", "bar": { ... } }\`
-      - **DO NOT** create empty swimlanes. If you find no tasks for an entity, do not include it.
-  4.  **BAR LOGIC:**
+  
+  **3.  INTELLIGENT COLORING (DECISION):**
+      - **FIRST,** before generating any data, analyze the *entire* dataset for 1-5 clear, cross-swimlane logical groupings (e.g., 'Task Type', 'Status', 'Team').
+      - **IF** you find strong logical groupings:
+          - You **MUST** populate the \`legend\` array with these groupings (e.g., \`[{"color": "blue", "label": "Regulatory Task"}]\`). This is **PATH 1**.
+      - **ELSE** (if no logical groupings are found):
+          - You **MUST** return an empty \`"legend": []\` array. This is **PATH 2**.
+
+  **4.  CHART DATA (GENERATION):**
+      - Create the 'data' array row by row.
+      - First, add swimlane objects: \`{ "title": "Swimlane Name", "isSwimlane": true, "entity": "Swimlane Name" }\`
+      - Then, add task objects: \`{ "title": "Task Name", "isSwimlane": false, "entity": "Swimlane Name", "bar": { ... } }\`
+      - **CRITICAL:** Every task object (where \`isSwimlane: false\`) **MUST** contain a \`bar\` object.
+      
+  **5.  BAR OBJECT LOGIC:**
+      - The \`bar\` object **MUST** be created for every task.
       - 'startCol' is the 1-based index of the 'timeColumns' array where the task begins.
       - 'endCol' is the 1-based index of the 'timeColumns' array where the task ends, **PLUS ONE**.
-      - A task in "2022" has \`startCol: 3, endCol: 4\` (if 2020 is col 1).
-      - If a date is "Q1 2024" and the interval is "Years", "2024" is the column. Map it to the "2024" column index.
-      - If a date is unknown ("null"), the 'bar' object must be \`{ "startCol": null, "endCol": null, "color": "..." }\`.
-
-  **5.  INTELLIGENT COLORING (NEW IF/ELSE LOGIC):**
-      - **FIRST:** Analyze the *entire* dataset for 1-5 clear, cross-swimlane logical groupings (e.g., 'Task Type', 'Status', 'Team').
-      - **IF** you find strong logical groupings:
-          - You **MUST** populate the \`legend\` array with these groupings (e.g., \`[{"color": "blue", "label": "Regulatory Task"}]\`).
-          - You **MUST** color all bars in the \`data\` array according to this new legend.
-      - **ELSE** (if no logical groupings are found OR they are unclear):
-          - You **MUST** return an empty \`"legend": []\` array.
-          - You **MUST** color all bars in the \`data\` array based *only* on their swimlane. All tasks with \`entity: "Entity A"\` get one color, all tasks with \`entity: "Entity B"\` get another color, etc.
+      - If a date is unknown ("null"), the 'bar' object **MUST** be \`{ "startCol": null, "endCol": null, "color": "default" }\`.
+      - **COLORING:**
+          - If you chose **PATH 1** (Legend): Assign the 'color' value based on the logical grouping you defined in the legend.
+          - If you chose **PATH 2** (No Legend): Assign the 'color' value based on the task's swimlane ('entity'). All tasks with the same 'entity' must have the same color.
           
-  6.  **SANITIZATION:** All string values MUST be valid JSON strings. You MUST properly escape any characters that would break JSON, such as double quotes (\") and newlines (\\n), within the string value itself.`;
+  **6.  SANITIZATION:** All string values MUST be valid JSON strings. You MUST properly escape any characters that would break JSON, such as double quotes (\") and newlines (\\n), within the string value itself.`;
   
   const geminiUserQuery = `User Prompt: "${userPrompt}"\n\nResearch Content:\n${researchTextCache}`;
 
