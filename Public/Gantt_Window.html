@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gantt Chart Result</title>
+    
+    <!-- 1. Load html2canvas for exporting (needed for the renderer) -->
+    <script 
+      src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" 
+      xintegrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+cHio/BJLMBKSnQYjDRMvMMlPzgw6D/LIIXbaK3ddhiNRVbcC+WfcD+WjGg==" 
+      crossorigin="anonymous" 
+      referrerpolicy="no-referrer"
+    ></script>
+    
+    <!-- 2. Load the original chart styles (NO TAILWIND) -->
+    <link rel="stylesheet" href="/style.css" />
+
+</head>
+<body>
+    
+    <!-- 
+      The chart-renderer.js script will find this div 
+      and build the chart inside it.
+    -->
+    <div id="chart-root"></div>
+
+    <!-- 3. Load the new chart rendering logic -->
+    <script type="module" src="/chart-renderer.js"></script>
+
+</body>
+</html>
