@@ -27,9 +27,10 @@
                     colors: {
                         'custom-text': '#0c2340',
                         'custom-outline': '#da291c',
-                        // Use the red color for the button
-                        'custom-button': '#da291c',
-                        'custom-button-hover': '#a91f15', // A darker red for hover
+                        // Set the button color to #da291c
+                        'custom-button': '#da291c', 
+                        // Updated hover color to a slightly darker shade of #da291c for contrast
+                        'custom-button-hover': '#b82317', 
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
@@ -65,7 +66,6 @@
 
     <!-- 
       Dynamic Roadmap Background SVG
-      The lines and dots use the color defined in the JS animation script below, which is already the requested red (#da291c).
     -->
     <svg id="roadmap-svg" class="absolute w-full -z-10" preserveAspectRatio="none">
         <!-- Lines will be dynamically added here by JS -->
@@ -190,9 +190,9 @@
             let titleEl, formEl, svg, linesGroup, pointsGroup;
 
             // --- Animation Parameters ---
-            // These already use the requested red color base (#da291c)
-            const pointColor = 'rgba(218, 41, 28, 0.4)'; 
-            const lineColor = 'rgba(218, 41, 28, 0.3)';
+            // Set lines and dots to white (#FFFFFF) with transparency
+            const pointColor = 'rgba(255, 255, 255, 0.5)'; // White with 50% opacity
+            const lineColor = 'rgba(255, 255, 255, 0.4)';  // White with 40% opacity
             const numMilestonesPerSide = 3; 
             const pointRadius = 5;
             const zigZagAmount = 80;
