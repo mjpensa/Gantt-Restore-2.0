@@ -112,7 +112,13 @@ function setupChart(ganttData) {
       const barEl = document.createElement('div');
       barEl.className = 'gantt-bar';
       barEl.setAttribute('data-color', bar.color || 'default');
-      barEl.style.gridColumn = `${bar.startCol} / ${bar.endCol}`;
+      
+      // --- FIX: Handle null endCol ---
+      // If endCol is null or undefined, default to spanning 1 column
+      const startCol = bar.startCol;
+      const endCol = bar.endCol ? bar.endCol : (startCol + 1);
+      
+      barEl.style.gridColumn = `${startCol} / ${endCol}`;
       
       barAreaEl.appendChild(barEl);
 
@@ -488,7 +494,7 @@ async function handleAskQuestion(taskIdentifier) {
   try {
     const response = await fetch('/ask-question', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'ContentType': 'application/json' },
       body: JSON.stringify({
         ...taskIdentifier,
         question: question
