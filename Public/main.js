@@ -92,8 +92,15 @@ async function handleChartGenerate(event) {
 
     // 5. Validate the data structure
     if (!ganttData || !ganttData.timeColumns || !ganttData.data) {
-      throw new Error('Invalid chart data received from server');
+      throw new Error('Invalid chart data structure received from server');
     }
+
+    // --- MODIFICATION: Add stronger validation for empty data ---
+    if (ganttData.timeColumns.length === 0 || ganttData.data.length === 0) {
+      console.warn("AI returned valid but empty data.", ganttData);
+      throw new Error('The AI was unable to find any tasks or time columns in the provided documents. Please check your files or try a different prompt.');
+    }
+    // --- END: New validation ---
 
     // 6. Render the chart
     setupChart(ganttData);
