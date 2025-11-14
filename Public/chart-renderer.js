@@ -34,7 +34,27 @@ function setupChart(ganttData) {
   // Create the main chart wrapper
   const chartWrapper = document.createElement('div');
   chartWrapper.id = 'gantt-chart-container'; // ID for styling & export
-
+  
+  // -------------------------------------------------------------------
+  // --- NEW: Add BIP Logo ---
+  // -------------------------------------------------------------------
+  // We add this *before* the title so it's part of the wrapper.
+  // We use inline styles for absolute positioning.
+  const logoImg = document.createElement('img');
+  logoImg.src = '/bip_logo.png';
+  logoImg.alt = 'BIP Logo';
+  
+  // Apply inline styles for positioning
+  logoImg.style.position = 'absolute';
+  logoImg.style.top = '16px'; // Match title's vertical padding
+  logoImg.style.right = '24px'; // Padding from right edge
+  logoImg.style.height = '40px'; // Slightly smaller than form logo
+  logoImg.style.width = 'auto';
+  logoImg.style.zIndex = '10'; // Ensure it's above the grid
+  
+  chartWrapper.appendChild(logoImg);
+  // --- END: Add BIP Logo ---
+  
   // Add Title (from data)
   const titleEl = document.createElement('div');
   titleEl.className = 'gantt-title';
@@ -127,8 +147,8 @@ function setupChart(ganttData) {
   addExportListener();
 
   // --- NEW: Add "Today" Line ---
-  // We use the provided date: November 13, 2025
-  const today = new Date('2025-11-13T12:00:00'); 
+  // We use the provided date: November 14, 2025 (Updated to current time)
+  const today = new Date('2025-11-14T12:00:00'); 
   addTodayLine(gridEl, ganttData.timeColumns, today);
 }
 
@@ -266,7 +286,7 @@ function findTodayColumnPosition(today, timeColumns) {
 
     const startOfMonth = new Date(todayYear, today.getMonth(), 1);
     const endOfMonth = new Date(todayYear, today.getMonth() + 1, 0);
-    const dayInMonth = today.getDate(); // 13th
+    const dayInMonth = today.getDate(); // 14th
     const totalDays = endOfMonth.getDate(); // 30 for Nov
     const percentage = dayInMonth / totalDays;
     return { index, percentage };
@@ -289,7 +309,7 @@ function findTodayColumnPosition(today, timeColumns) {
 /**
  * Gets the ISO 8601 week number for a given date.
  * @param {Date} date - The date.
- *S @returns {number} The week number.
+S @returns {number} The week number.
  */
 function getWeek(date) {
   var d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
