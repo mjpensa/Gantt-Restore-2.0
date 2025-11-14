@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dynamic Gantt Chart</title>
     
-    <!-- 1. Load Tailwind CSS -->
+    <!-- 1. Load Tailwind CSS (and its "preflight" base styles) FIRST -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- 2. Load html2canvas for exporting -->
@@ -17,9 +17,10 @@
     ></script>
 
     <!-- 
-      *** FIX: ADDED THE MISSING STYLESHEET ***
-      This file contains all the essential styles for the chart, 
-      modal, and other dynamic elements.
+      *** FIX: MOVED STYLESHEET HERE ***
+      Load our custom styles *after* the Tailwind script.
+      This ensures our chart styles (.gantt-grid, .gantt-bar) 
+      override Tailwind's base "preflight" resets.
     -->
     <link rel="stylesheet" href="/style.css" />
     
