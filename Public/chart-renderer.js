@@ -31,6 +31,10 @@ function setupChart(ganttData) {
   // Clear container
   container.innerHTML = '';
 
+  // --- NEW: Add console log for debugging ---
+  console.log("Data received from server:", ganttData);
+  // --- END NEW ---
+
   // Create the main chart wrapper
   const chartWrapper = document.createElement('div');
   chartWrapper.id = 'gantt-chart-container'; // ID for styling & export
@@ -130,6 +134,12 @@ function setupChart(ganttData) {
 
   chartWrapper.appendChild(gridEl);
   
+  // --- Add Chart to Page ---
+  container.appendChild(chartWrapper);
+
+  // --- NEW: Add Legend (if it exists) ---
+  addLegend(container, ganttData.legend);
+
   // --- Add Export Button ---
   const exportContainer = document.createElement('div');
   exportContainer.className = 'export-container';
@@ -139,8 +149,7 @@ function setupChart(ganttData) {
   exportBtn.textContent = 'Export as PNG';
   exportContainer.appendChild(exportBtn);
   
-  // Add the chart and button to the page
-  container.appendChild(chartWrapper);
+  // Add the button to the page
   container.appendChild(exportContainer);
 
   // Add Export Functionality
@@ -151,6 +160,41 @@ function setupChart(ganttData) {
   const today = new Date('2025-11-14T12:00:00'); 
   addTodayLine(gridEl, ganttData.timeColumns, today);
 }
+
+/**
+ * --- NEW: Renders the color legend, if provided ---
+ * @param {HTMLElement} container - The #chart-root element.
+ * @param {Array<{color: string, label: string}>} legend - The legend data.
+ */
+function addLegend(container, legend) {
+  if (!legend || legend.length === 0) {
+    return; // No legend to render
+  }
+
+  const legendContainer = document.createElement('div');
+  legendContainer.className = 'gantt-legend-container';
+
+  legend.forEach(item => {
+    const legendItem = document.createElement('div');
+    legendItem.className = 'legend-item';
+
+    const swatch = document.createElement('span');
+    swatch.className = 'legend-color-swatch';
+    // Use the data-color attribute to link to the CSS colors
+    swatch.setAttribute('data-color', item.color); 
+
+    const label = document.createElement('span');
+    label.className = 'legend-label';
+    label.textContent = item.label;
+
+    legendItem.appendChild(swatch);
+    legendItem.appendChild(label);
+    legendContainer.appendChild(legendItem);
+  });
+
+  container.appendChild(legendContainer);
+}
+
 
 /**
  * Finds the export button and chart container, then
