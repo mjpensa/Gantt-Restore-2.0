@@ -1,4 +1,4 @@
-Dynamic Gantt Chart Generator
+AI Roadmap Generator
 
 This is a Node.js web application that uses the Gemini API to analyze project plans and dynamically generate a custom HTML/CSS Gantt chart.
 
@@ -18,7 +18,7 @@ Deployment to Railway
 
 This project is configured for a simple deployment on Railway.
 
-1. Local Setup (Optional, but recommended):
+Local Setup (Optional, but recommended):
 
 Create a file named .env in the root of your project.
 
@@ -26,12 +26,11 @@ Add your Gemini API key to it:
 
 API_KEY=YOUR_GEMINI_API_KEY_HERE
 
-
 Run npm install to install dependencies.
 
 Run npm start to test the server locally.
 
-2. Railway Deployment:
+Railway Deployment:
 
 Push to GitHub: Create a new repository on GitHub and push all these files:
 
