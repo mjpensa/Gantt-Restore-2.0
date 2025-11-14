@@ -20,6 +20,8 @@
   overflow: hidden;
   margin-top: 24px;
   font-family: 'Inter', sans-serif;
+  /* NEW: Added relative positioning for the logo */
+  position: relative; 
 }
 
 /* 7. Chart Title */
@@ -132,6 +134,8 @@
   justify-content: center;
   padding: 20px 0 0 0;
   font-family: 'Inter', sans-serif;
+  background-color: #282828; /* Match chart background */
+  padding: 20px;
 }
 .export-button {
   font-family: 'Inter', sans-serif;
@@ -436,3 +440,47 @@
 .chat-send-btn:hover {
   background-color: #1F6AA1;
 }
+
+/* ------------------------------------------------------------------- */
+/* --- NEW: LEGEND STYLES --- */
+/* ------------------------------------------------------------------- */
+
+.gantt-legend-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background-color: #282828; /* Match chart background */
+  border-top: 1px solid #0D0D0D; /* Grid line color */
+  font-family: 'Inter', sans-serif;
+  color: #FFFFFF;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+}
+
+.legend-color-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  margin-right: 8px;
+}
+
+.legend-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #CCCCCC;
+}
+
+/* --- Legend Swatch Colors --- */
+/* These MUST match the .gantt-bar colors */
+
+.legend-color-swatch[data-color="blue"] { background-color: #2E7BB1; }
+.legend-color-swatch[data-color="ochre"] { background-color: #EE9E20; }
+.legend-color-swatch[data-color="orange"] { background-color: #BA3930; }
+.legend-color-swatch[data-color="green"] { background-color: #50AF7B; }
+.legend-color-swatch[data-color="default"] { background-color: #874E61; }
