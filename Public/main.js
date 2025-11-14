@@ -19,41 +19,42 @@ function displayError(message) {
     errorMessage.style.display = 'block';
 }
 
-// --- Event Listeners ---
-document.addEventListener("DOMContentLoaded", () => {
-  const ganttForm = document.getElementById('gantt-form');
-  ganttForm.addEventListener('submit', handleChartGenerate);
+// --- Helper to trigger file processing logic using a FileList object ---
+function processFiles(files) {
+    const fileInput = document.getElementById('file-input');
+    const dropzonePrompt = document.getElementById('dropzone-prompt');
+    const fileListContainer = document.getElementById('file-list-container');
+    const fileList = document.getElementById('file-list');
 
-  // --- File input listener ---
-  const fileInput = document.getElementById('file-input');
-  const dropzonePrompt = document.getElementById('dropzone-prompt');
-  const fileListContainer = document.getElementById('file-list-container');
-  const fileList = document.getElementById('file-list');
-
-  fileInput.addEventListener('change', () => {
     // Clear previous errors
     document.getElementById('error-message').style.display = 'none';
 
-    if (fileInput.files.length > 0) {
-      const files = Array.from(fileInput.files);
-      let validFiles = [];
-      let invalidFiles = [];
+    if (files.length === 0) {
+        // No files selected
+        dropzonePrompt.classList.remove('hidden');
+        fileListContainer.classList.add('hidden');
+        return;
+    }
 
-      // 1. Validate files
-      for (const file of files) {
+    const filesArray = Array.from(files);
+    let validFiles = [];
+    let invalidFiles = [];
+
+    // 1. Validate files
+    for (const file of filesArray) {
         // Check mime type (preferred) or rely on extension fallback
         const isValidMime = SUPPORTED_FILE_MIMES.includes(file.type);
         const isValidExtension = SUPPORTED_FILE_EXTENSIONS.some(ext => file.name.toLowerCase().endsWith(ext));
 
         if (isValidMime || isValidExtension) {
-          validFiles.push(file);
+            validFiles.push(file);
         } else {
-          invalidFiles.push(file.name);
+            invalidFiles.push(file.name);
         }
-      }
+    }
 
-      // 2. Handle invalid files
-      if (invalidFiles.length > 0) {
+    // 2. Handle invalid files
+    if (invalidFiles.length > 0) {
         const errorMsg = `The following files are not supported: ${invalidFiles.join(', ')}. Please upload only ${SUPPORTED_FILES_STRING} files.`;
         displayError(errorMsg);
         
@@ -64,35 +65,81 @@ document.addEventListener("DOMContentLoaded", () => {
         dropzonePrompt.classList.remove('hidden');
         fileListContainer.classList.add('hidden');
         return;
-      }
+    }
 
-      // 3. If files are valid, update the list display
-      fileList.innerHTML = ''; // Clear previous list
-      
-      // We must create a new FileList object that only contains the valid files
-      const dataTransfer = new DataTransfer();
-      for (const file of validFiles) {
+    // 3. If files are valid, update the list display
+    fileList.innerHTML = ''; // Clear previous list
+    
+    // Create a new DataTransfer object to hold valid files
+    const dataTransfer = new DataTransfer();
+    for (const file of validFiles) {
         const li = document.createElement('li');
         li.className = 'truncate'; 
         li.textContent = file.name;
         li.title = file.name; // Show full name on hover
         fileList.appendChild(li);
         dataTransfer.items.add(file); // Add valid file to the DataTransfer
-      }
-      
-      // Update the input field's files property with the clean list
-      fileInput.files = dataTransfer.files;
+    }
+    
+    // Update the input field's files property with the clean list
+    fileInput.files = dataTransfer.files;
 
-      dropzonePrompt.classList.add('hidden');
-      fileListContainer.classList.remove('hidden');
+    dropzonePrompt.classList.add('hidden');
+    fileListContainer.classList.remove('hidden');
+}
 
-    } else {
-      // No files selected
-      dropzonePrompt.classList.remove('hidden');
-      fileListContainer.classList.add('hidden');
+
+// --- Event Listeners ---
+document.addEventListener("DOMContentLoaded", () => {
+  const ganttForm = document.getElementById('gantt-form');
+  ganttForm.addEventListener('submit', handleChartGenerate);
+
+  const fileInput = document.getElementById('file-input');
+  const dropzoneLabel = document.querySelector('.dropzone-container'); // The clickable label
+
+  // MODIFICATION: Consolidated file selection logic into processFiles
+  fileInput.addEventListener('change', (e) => {
+    processFiles(e.target.files);
+  });
+  
+  // -------------------------------------------------------------------
+  // --- NEW: DRAG AND DROP EVENT LISTENERS ---
+  // -------------------------------------------------------------------
+
+  // 1. Prevent default behavior on dragover/dragenter (REQUIRED for drop to work)
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropzoneLabel.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    }, false);
+  });
+  
+  // 2. Handle file drop
+  dropzoneLabel.addEventListener('drop', (e) => {
+    const droppedFiles = e.dataTransfer.files;
+    processFiles(droppedFiles);
+  }, false);
+
+  // 3. (Optional) Visual feedback for drag
+  dropzoneLabel.addEventListener('dragenter', () => {
+    dropzoneLabel.classList.add('border-white');
+    dropzoneLabel.classList.remove('border-custom-outline');
+  });
+
+  dropzoneLabel.addEventListener('dragleave', () => {
+    // Check if the cursor is actually leaving the element
+    if (!dropzoneLabel.contains(document.elementFromPoint(event.clientX, event.clientY))) {
+        dropzoneLabel.classList.remove('border-white');
+        dropzoneLabel.classList.add('border-custom-outline');
     }
   });
-  // --- END: File input listener ---
+
+  dropzoneLabel.addEventListener('drop', () => {
+    // Reset visual state after drop
+    dropzoneLabel.classList.remove('border-white');
+    dropzoneLabel.classList.add('border-custom-outline');
+  });
+
 });
 
 /**
